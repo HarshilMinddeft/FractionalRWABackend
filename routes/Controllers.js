@@ -1,5 +1,5 @@
-const properties = require("../../Backend/models/propertyModel.js");
-const { uploadFileToIPFS, uploadJSONToIPFS } = require("../../Backend/utils/ipfsUploader.js");
+const properties = require("../models/propertyModel.js");
+const { uploadFileToIPFS, uploadJSONToIPFS } = require("../utils/ipfsUploader.js");
 const path = require("path");
 
 class Controller {
