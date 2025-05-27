@@ -18,14 +18,16 @@ app.use(
 );
 dotenv.config();
 
+const port = 3001;
+
 const URL =
   "mongodb+srv://harshil:harshil8888@cluster0.nguunro.mongodb.net/Property?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose
   .connect(URL)
   .then(() => {
-    console.log("db connected");
-    app.listen(3001);
+    console.log("db connected ",`listening on port ${port}`);
+    app.listen(port);
   })
   .catch((error) => console.log(error));
 
