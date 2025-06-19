@@ -28,10 +28,10 @@ class Controller {
  async addProperty(req, res) {
     try {
         // Destructure data from the request body
-        const {propertyId, propertyName, propertyPrice, propertySize, propertyOwnerWallet, propertyFeatures, offringDetailes, propertyDetailes, propertyManagement ,locationDetailes, propertyDocuments, propertyImages, propertyThumbImages, active } = req.body;
+        const {propertyId, propertyName, propertyPrice, propertySize, propertyOwnerWallet, propertyFeatures, offringDetailes, propertyDetailes, propertyManagement ,locationDetailes, propertyDocuments, propertyImages, propertyThumbImages, complianceAddress, active } = req.body;
 
         // Validate required fields
-        if (!propertyId ||!propertyName || !propertyPrice || !propertySize || !propertyOwnerWallet || !propertyFeatures || !offringDetailes || !propertyDetailes || !propertyManagement || !locationDetailes || !propertyDocuments || !propertyImages || !propertyThumbImages) {
+        if (!propertyId ||!propertyName || !propertyPrice || !propertySize || !propertyOwnerWallet || !propertyFeatures || !offringDetailes || !propertyDetailes || !propertyManagement || !locationDetailes || !propertyDocuments || !propertyImages || !propertyThumbImages || !complianceAddress) {
             return res.status(400).json({ message: "All fields are required." });
         }
 
@@ -50,6 +50,7 @@ class Controller {
             propertyDocuments,
             propertyImages,
             propertyThumbImages,
+            complianceAddress,
             active
         });
 

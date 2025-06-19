@@ -53,10 +53,14 @@ const propertySchema = new mongoose.Schema({
     type: [String],
     required: true,
   },
+  complianceAddress: {
+    type: String,
+    required: true,
+  },
   active: {
      type: Boolean,
      default: true 
   }
 });
 
-module.exports = mongoose.model("Property", propertySchema);
+module.exports = mongoose.model("3643Property", propertySchema);

@@ -21,7 +21,7 @@ dotenv.config();
 const port = 3001;
 
 const URL =
-  "mongodb+srv://harshil:harshil8888@cluster0.nguunro.mongodb.net/Property?retryWrites=true&w=majority&appName=Cluster0";
+  "mongodb+srv://harshil:harshil8888@cluster0.nguunro.mongodb.net/3643Property?retryWrites=true&w=majority&appName=Cluster0";
 
 mongoose
   .connect(URL)
