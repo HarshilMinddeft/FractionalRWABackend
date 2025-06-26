@@ -32,20 +32,26 @@ const port = 3001;
 //   .catch((error) => console.log(error));
 
 //   app.use("/api", routes);
-
 app.post("/api/blockpass-webhook", (req, res) => {
   const payload = req.body;
-  console.log("🟦 Webhook received:", payload);
+  console.log("🟦 Webhook received at", new Date().toISOString());
+  console.log("Payload:", JSON.stringify(payload, null, 2));
+  console.log("RAW PAYLOAD",payload)
 
-  const { status, refId, identities } = payload;
+  const { status, refId, identities, metadata } = payload;
+
   if (status === "approved") {
-    console.log(`✅ KYC approved: ${refId}`, identities);
-    // Save to DB, update user status...
+    console.log(`✅ KYC approved for ${refId}`);
+    console.log("Identities:", identities);
+    console.log("Metadata:", metadata);
+
+
   } else {
-    console.log(`🔶 KYC status for ${refId}:`, status);
+    console.log(`ℹ️ KYC status update for ${refId}: ${status}`);
   }
 
-  res.status(200).send("Received");
+  res.status(200).send("Webhook received");
 });
+
 
 app.listen(3001, () => console.log("Listening on 3001"));
