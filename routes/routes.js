@@ -1,5 +1,6 @@
 const express = require("express");
 const controllers = require("./Controllers")
+const userController = require("./Controllers")
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
@@ -23,4 +24,8 @@ router.get('/Properties/getOwnerProperty',controllers.getPropertiesByOwner)
 router.get('/Properties/marketPlace/getAllPropertiesSummary',controllers.getAllPropertiesSummary)
 router.get('/Properties/marketPlace/getPropertyById/:id',controllers.getPropertyById)
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+router.post('/user/addnewUser',userController.addUser);
+router.get('/user/fetchUser',userController.getUserByRefId);
+router.post('/blockpass-webhook',userController.blockpasswebhook);
 module.exports = router;
