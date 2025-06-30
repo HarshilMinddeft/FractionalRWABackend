@@ -1,4 +1,10 @@
 const userData = require('../models/UserModel.js')
+const identityStorageArti = require('../artifacts/contracts/RwaERC-3643/registry/implementation/IdentityRegistryStorage.sol/IdentityRegistryStorage.json')
+const onchainIdArti = require('@onchain-id/solidity/contracts/artifacts/contracts/Identity.sol/Identity.json')
+const claimIssuer = require('@onchain-id/solidity/contracts/artifacts/contracts/ClaimIssuer.sol/ClaimIssuer.json')
+const { ethers } = require("ethers");
+const provider = new ethers.providers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org");
+const deployer = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
 
 class userController {
 
@@ -53,6 +59,35 @@ async blockpasswebhook(req, res) {
 
   if (status === "approved") {
     console.log(`KYC approved for ${refId}`);
+
+     try {
+      // ✅ Fetch user from database directly using Mongoose
+      const user = await userData.findOne({ refId });
+
+      if (!user) {
+        console.log("User not found for refId:", refId);
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      const userWallet = user.userWalletAddress;
+      console.log("Deploying Identity.sol for wallet:", userWallet);
+
+      const identityFactory = new ethers.ContractFactory(
+        onchainIdArti.abi,
+        onchainIdArti.bytecode,
+        deployer
+      );
+
+      const identity = await identityFactory.deploy(deployer.address); // or userWallet if you want them to be owner
+      await identity.waitForDeployment();
+
+      const identityAddress = await identity.getAddress();
+      console.log("✅ Identity.sol deployed at:", identityAddress);
+
+    } catch (err) {
+      console.error("❌ Error during Identity deployment:", err.message);
+      return res.status(500).json({ message: "Internal error during Identity deployment" });
+    }
 
   } else {
     console.log(`KYC status update for ${refId}: ${status}`);
