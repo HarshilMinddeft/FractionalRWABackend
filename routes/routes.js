@@ -1,6 +1,6 @@
 const express = require("express");
-const controllers = require("./Controllers")
-const userController = require("./Controllers")
+const Controller = require("./Controllers")
+// const userController = require("./Controllers")
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
@@ -17,15 +17,11 @@ const upload = multer({ storage });
 
 /* User Router */
 
-router.post('/Properties/nftUpload', upload.single("file"), controllers.nftUpload);
-router.post('/Properties/metadataUpload',controllers.uploadMetadata)
-router.post('/Properties/addProperty',controllers.addProperty)
-router.get('/Properties/getOwnerProperty',controllers.getPropertiesByOwner)
-router.get('/Properties/marketPlace/getAllPropertiesSummary',controllers.getAllPropertiesSummary)
-router.get('/Properties/marketPlace/getPropertyById/:id',controllers.getPropertyById)
+router.post('/Properties/nftUpload', upload.single("file"), Controller.nftUpload);
+router.post('/Properties/metadataUpload',Controller.uploadMetadata)
+router.post('/Properties/addProperty',Controller.addProperty)
+router.get('/Properties/getOwnerProperty',Controller.getPropertiesByOwner)
+router.get('/Properties/marketPlace/getAllPropertiesSummary',Controller.getAllPropertiesSummary)
+router.get('/Properties/marketPlace/getPropertyById/:id',Controller.getPropertyById)
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-router.post('/user/addnewUser',userController.addUser);
-router.get('/user/fetchUser',userController.getUserByRefId);
-router.post('/blockpass-webhook',userController.blockpasswebhook);
 module.exports = router;
