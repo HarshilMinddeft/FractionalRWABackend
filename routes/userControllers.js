@@ -3,7 +3,7 @@ const identityStorageArti = require('../artifacts/contracts/RwaERC-3643/registry
 const IdentityArti = require('../artifacts/contracts/onchainId/Identity.json')
 const claimIssuer = require('../artifacts/contracts/onchainId/ClaimIssuer.json')
 const { ethers } = require("ethers");
-const provider = new ethers.providers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org");
+const provider = new ethers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org");
 const deployer = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
 
 class userController {
