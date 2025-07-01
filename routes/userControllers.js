@@ -152,7 +152,6 @@ async blockpasswebhook(req, res) {
   } else {
     console.log(`KYC status update for ${refId}: ${status}`);
   }
-  res.status(200).send("Webhook received");
 };
 }
 
