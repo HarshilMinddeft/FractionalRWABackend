@@ -1,6 +1,6 @@
 const userData = require('../models/UserModel.js')
 const identityStorageArti = require('../artifacts/contracts/RwaERC-3643/registry/implementation/IdentityRegistryStorage.sol/IdentityRegistryStorage.json')
-const onchainIdArti = require('../artifacts/contracts/onchainId/Identity.json')
+const IdentityArti = require('../artifacts/contracts/onchainId/Identity.json')
 const claimIssuer = require('../artifacts/contracts/onchainId/ClaimIssuer.json')
 const { ethers } = require("ethers");
 const provider = new ethers.providers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org");
@@ -70,17 +70,76 @@ async blockpasswebhook(req, res) {
       const userWallet = user.userWalletAddress;
       console.log("Deploying Identity.sol for wallet:", userWallet);
 
+// Deploy Identity.sol
       const identityFactory = new ethers.ContractFactory(
-        onchainIdArti.abi,
-        onchainIdArti.bytecode,
+        IdentityArti.abi,
+        IdentityArti.bytecode,
         deployer
       );
 
       const identity = await identityFactory.deploy(deployer.address,false);
-      await identity.deployed();
+      await identity.waitForDeployment();
 
-      const identityAddress = identity.address;
+      const identityAddress = identity.getAddress();
       console.log("✅ Identity.sol deployed at:", identityAddress);
+
+// Generate Signature and data for addingClaim
+      const topic = 1;
+      const data = ethers.toUtf8Bytes("KYC-verified");
+      const claimIssureCA = "0x496Cc5B22f83257e4DD59f3a862Dc378107e69fb"
+      const uri = `Kyc-BlockPass-${refId}`
+
+      const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["address", "uint256", "bytes"],
+        [identity, topic, data]
+      );
+
+      const dataHash = ethers.keccak256(encoded); // hash to sign
+      const signature = await deployer.signMessage(ethers.getBytes(dataHash));
+      const Data = ethers.hexlify(data)
+
+      console.log("Signature:", signature);
+      console.log("Issuer Address (should be added as key with purpose 3):", deployer.address);
+      console.log("Data (hex):",Data);
+
+// AddClaim in identity.sol
+
+      const AddClaimIdentity = new ethers.Contract(
+        identityAddress,
+        IdentityArti.abi,
+        deployer
+      );
+      
+      const addKycClaim = await AddClaimIdentity.addClaim(
+        topic,
+        1,
+        claimIssureCA,
+        signature,
+        Data,
+        uri
+      );
+      const receipt = await addKycClaim.wait();
+      console.log("Transaction confirmed in block:", receipt.blockNumber);
+
+// Add identity.sol and userAddress to registry contract 
+
+      const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
+
+      const registryStorage = new ethers.Contract(
+        registryStoregeCA,
+        identityStorageArti.abi,
+        deployer
+      );
+
+      const addIdentity = await registryStorage.addIdentityToStorage(
+        userWallet,
+        identityAddress,
+        1
+      )
+        const AddIdentityreceipt = await addIdentity.wait();
+      console.log("IdentityAddedToIdentityStorage", AddIdentityreceipt.hash);
+
+      console.log("Kyc process is completed successfully")
 
     } catch (err) {
       console.error("❌ Error during Identity deployment:", err.message);

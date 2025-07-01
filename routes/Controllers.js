@@ -1,7 +1,6 @@
 const properties = require("../models/propertyModel.js");
 const { uploadFileToIPFS, uploadJSONToIPFS } = require("../utils/ipfsUploader.js");
 const path = require("path");
-const { ethers } = require("ethers");
 
 class Controller {
 
