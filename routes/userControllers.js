@@ -56,6 +56,8 @@ async blockpasswebhook(req, res) {
 
   const { status, refId } = payload;
 
+  res.status(200).send("Webhook received");
+
   if (status === "approved") {
     console.log(`KYC approved for ${refId}`);
 
@@ -69,6 +71,7 @@ async blockpasswebhook(req, res) {
 
       const userWallet = user.userWalletAddress;
       console.log("Deploying Identity.sol for wallet:", userWallet);
+
 
 // Deploy Identity.sol
       const identityFactory = new ethers.ContractFactory(
