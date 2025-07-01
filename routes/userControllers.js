@@ -80,7 +80,7 @@ async blockpasswebhook(req, res) {
       const identity = await identityFactory.deploy(deployer.address,false);
       await identity.waitForDeployment();
 
-      const identityAddress = identity.getAddress();
+      const identityAddress = await identity.getAddress();
       console.log("✅ Identity.sol deployed at:", identityAddress);
 
 // Generate Signature and data for addingClaim
@@ -91,7 +91,7 @@ async blockpasswebhook(req, res) {
 
       const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
         ["address", "uint256", "bytes"],
-        [identity, topic, data]
+        [identityAddress, topic, data]
       );
 
       const dataHash = ethers.keccak256(encoded); // hash to sign
@@ -121,25 +121,25 @@ async blockpasswebhook(req, res) {
       const receipt = await addKycClaim.wait();
       console.log("Transaction confirmed in block:", receipt.blockNumber);
 
-// Add identity.sol and userAddress to registry contract 
+// // Add identity.sol and userAddress to registry contract 
 
-      const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
+//       const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
 
-      const registryStorage = new ethers.Contract(
-        registryStoregeCA,
-        identityStorageArti.abi,
-        deployer
-      );
+//       const registryStorage = new ethers.Contract(
+//         registryStoregeCA,
+//         identityStorageArti.abi,
+//         deployer
+//       );
 
-      const addIdentity = await registryStorage.addIdentityToStorage(
-        userWallet,
-        identityAddress,
-        1
-      )
-        const AddIdentityreceipt = await addIdentity.wait();
-      console.log("IdentityAddedToIdentityStorage", AddIdentityreceipt.hash);
+//       const addIdentity = await registryStorage.addIdentityToStorage(
+//         userWallet,
+//         identityAddress,
+//         1
+//       )
+//       const AddIdentityreceipt = await addIdentity.wait();
+//       console.log("IdentityAddedToIdentityStorage", AddIdentityreceipt.hash);
 
-      console.log("Kyc process is completed successfully")
+//       console.log("Kyc process is completed successfully")
 
     } catch (err) {
       console.error("❌ Error during Identity deployment:", err.message);
