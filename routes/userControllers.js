@@ -1,7 +1,7 @@
 const userData = require('../models/UserModel.js')
 const identityStorageArti = require('../artifacts/contracts/RwaERC-3643/registry/implementation/IdentityRegistryStorage.sol/IdentityRegistryStorage.json')
-const onchainIdArti = require('@onchain-id/solidity/contracts/artifacts/contracts/Identity.sol/Identity.json')
-const claimIssuer = require('@onchain-id/solidity/contracts/artifacts/contracts/ClaimIssuer.sol/ClaimIssuer.json')
+const onchainIdArti = require('../artifacts/contracts/onchainId/Identity.json')
+const claimIssuer = require('../artifacts/contracts/onchainId/ClaimIssuer.json')
 const { ethers } = require("ethers");
 const provider = new ethers.providers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org");
 const deployer = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
@@ -53,7 +53,6 @@ async blockpasswebhook(req, res) {
   const payload = req.body;
   console.log("Webhook received at", new Date().toISOString());
   console.log("Payload:", JSON.stringify(payload, null, 2));
-  console.log("RAW PAYLOAD",payload)
 
   const { status, refId } = payload;
 
@@ -61,7 +60,6 @@ async blockpasswebhook(req, res) {
     console.log(`KYC approved for ${refId}`);
 
      try {
-      // ✅ Fetch user from database directly using Mongoose
       const user = await userData.findOne({ refId });
 
       if (!user) {
@@ -78,10 +76,10 @@ async blockpasswebhook(req, res) {
         deployer
       );
 
-      const identity = await identityFactory.deploy(deployer.address); // or userWallet if you want them to be owner
-      await identity.waitForDeployment();
+      const identity = await identityFactory.deploy(deployer.address,false);
+      await identity.deployed();
 
-      const identityAddress = await identity.getAddress();
+      const identityAddress = identity.address;
       console.log("✅ Identity.sol deployed at:", identityAddress);
 
     } catch (err) {
