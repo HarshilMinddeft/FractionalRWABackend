@@ -70,9 +70,23 @@ async blockpasswebhook(req, res) {
       }
 
       const userWallet = user.userWalletAddress;
+
+      if (userWallet) {
+      const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
+
+      const registryStorageCheck = new ethers.Contract(
+        registryStoregeCA,
+        identityStorageArti.abi,
+        deployer
+      );
+      const addIdentity = await registryStorageCheck.storedIdentity(userWallet)
+
+      if (addIdentity !== ethers.ZeroAddress) {
+       return res.status(400).json({ message: "User already has an identity." });
+      }}
+
       console.log("Deploying Identity.sol for wallet:", userWallet);
-
-
+      
 // Deploy Identity.sol
       const identityFactory = new ethers.ContractFactory(
         IdentityArti.abi,
