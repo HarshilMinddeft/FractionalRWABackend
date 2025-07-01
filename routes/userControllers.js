@@ -66,7 +66,7 @@ async blockpasswebhook(req, res) {
 
       if (!user) {
         console.log("User not found for refId:", refId);
-        return res.status(404).json({ message: "User not found." });
+        return ;
       }
 
       const userWallet = user.userWalletAddress;
@@ -82,11 +82,12 @@ async blockpasswebhook(req, res) {
       const addIdentity = await registryStorageCheck.storedIdentity(userWallet)
 
       if (addIdentity !== ethers.ZeroAddress) {
-       return res.status(400).json({ message: "User already has an identity." });
+         console.log("UserAlreadyAdded")
+         return ;
       }}
 
       console.log("Deploying Identity.sol for wallet:", userWallet);
-      
+
 // Deploy Identity.sol
       const identityFactory = new ethers.ContractFactory(
         IdentityArti.abi,
