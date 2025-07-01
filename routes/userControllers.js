@@ -10,14 +10,13 @@ class userController {
 
 async addUser(req, res) {
     try {
-        const {userId, refId, userWalletAddress, kycActive } = req.body;
+        const {refId, userWalletAddress, kycActive } = req.body;
         console.log(req.body)
 
-        if (!userId ||!refId || !userWalletAddress ||!kycActive ) {
+        if (!refId || !userWalletAddress ||!kycActive ) {
             return res.status(400).json({ message: "All fields are required." });
         }
         const newUserData = new userData({
-            userId,
             refId,
             userWalletAddress: userWalletAddress.toLowerCase(),
             kycActive,
@@ -139,7 +138,7 @@ async blockpasswebhook(req, res) {
       const receipt = await addKycClaim.wait();
       console.log("Claim Addes Transaction confirmed in block:", receipt.blockNumber);
 
-// // Add identity.sol and userAddress to registry contract 
+// Add identity.sol and userAddress to registry contract 
 
       const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
 
