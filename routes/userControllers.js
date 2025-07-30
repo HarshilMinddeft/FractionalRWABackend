@@ -79,6 +79,8 @@ async blockpasswebhook(req, res) {
         deployer
       );
       const addIdentity = await registryStorageCheck.storedIdentity(userWallet)
+      console.log("addIdentity",addIdentity)
+      console.log("userWallet",userWallet)
 
       if (addIdentity !== ethers.ZeroAddress) {
          console.log("UserAlreadyAdded")
@@ -98,7 +100,7 @@ async blockpasswebhook(req, res) {
       await identity.waitForDeployment();
 
       const identityAddress = await identity.getAddress();
-      console.log("✅ Identity.sol deployed at:", identityAddress);
+      console.log("Identity.sol deployed at:", identityAddress);
 
 // Generate Signature and data for addingClaim
       const topic = 1;
@@ -111,7 +113,7 @@ async blockpasswebhook(req, res) {
         [identityAddress, topic, data]
       );
 
-      const dataHash = ethers.keccak256(encoded); // hash to sign
+      const dataHash = ethers.keccak256(encoded);
       const signature = await deployer.signMessage(ethers.getBytes(dataHash));
       const Data = ethers.hexlify(data)
 
@@ -159,7 +161,7 @@ async blockpasswebhook(req, res) {
       console.log("Kyc process is completed successfully")
 
     } catch (err) {
-      console.error("❌ Error during Identity deployment:", err.message);
+      console.error("Error during Identity deployment:", err.message);
       return res.status(500).json({ message: "Internal error during Identity deployment" });
     }
 
