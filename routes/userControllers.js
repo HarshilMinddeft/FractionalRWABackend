@@ -3,7 +3,7 @@ const identityStorageArti = require('../artifacts/contracts/RwaERC-3643/registry
 const IdentityArti = require('../artifacts/contracts/onchainId/Identity.json')
 const claimIssuer = require('../artifacts/contracts/onchainId/ClaimIssuer.json')
 const { ethers } = require("ethers");
-const provider = new ethers.JsonRpcProvider("https://alfajores-forno.celo-testnet.org");
+const provider = new ethers.JsonRpcProvider("https://rpc.testnet.soniclabs.com");
 const deployer = new ethers.Wallet(process.env.DEPLOYER_PRIVATE_KEY, provider);
 
 class userController {
@@ -71,13 +71,13 @@ async blockpasswebhook(req, res) {
       const userWallet = user.userWalletAddress;
 
       if (userWallet) {
-      const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
+      const registryStoregeCA = "0x35d821976B30A0AE64adD0328aa2aeAc05d3F2dc"
 
       const registryStorageCheck = new ethers.Contract(
         registryStoregeCA,
         identityStorageArti.abi,
         deployer
-      );
+      );  
       const addIdentity = await registryStorageCheck.storedIdentity(userWallet)
       console.log("addIdentity",addIdentity)
       console.log("userWallet",userWallet)
@@ -105,7 +105,7 @@ async blockpasswebhook(req, res) {
 // Generate Signature and data for addingClaim
       const topic = 1;
       const data = ethers.toUtf8Bytes("KYC-verified");
-      const claimIssureCA = "0x496Cc5B22f83257e4DD59f3a862Dc378107e69fb"
+      const claimIssureCA = "0x1ffaEC74657E24754D18b4Fa6EB8cEdBF3b06663"
       const uri = `Kyc-BlockPass-${refId}`
 
       const encoded = ethers.AbiCoder.defaultAbiCoder().encode(
@@ -142,7 +142,7 @@ async blockpasswebhook(req, res) {
 
 // Add identity.sol and userAddress to registry contract 
 
-      const registryStoregeCA = "0x4D5F47A18ec98EB605bd2aB99e43A2786Acc26FC"
+      const registryStoregeCA = "0x35d821976B30A0AE64adD0328aa2aeAc05d3F2dc"
 
       const registryStorage = new ethers.Contract(
         registryStoregeCA,
