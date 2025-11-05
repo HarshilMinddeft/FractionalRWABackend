@@ -5,6 +5,11 @@ const path = require("path");
 require("dotenv").config();
 
 async function uploadFileToIPFS(filePath, originalName) {
+  // Check if file exists before attempting upload
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`File not found: ${filePath}`);
+  }
+
   const data = new FormData();
   data.append("file", fs.createReadStream(filePath));
   data.append("pinataOptions", '{"cidVersion": 0}');
@@ -20,9 +25,6 @@ async function uploadFileToIPFS(filePath, originalName) {
       },
     }
   );
-  if (!fs.existsSync(filePath)) {
-  throw new Error(`File not found: ${filePath}`);
-}
 
   return {
     IpfsHash: response.data.IpfsHash,
