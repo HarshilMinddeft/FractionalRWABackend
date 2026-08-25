@@ -1,4 +1,13 @@
 {
+  "name": "fractional-rwa-backend",
+  "version": "1.0.0",
+  "description": "Production backend for TrueFraction — fractional real-world asset tokenization on Sonic testnet.",
+  "type": "commonjs",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js"
+  },
   "dependencies": {
     "@onchain-id/identity-sdk": "^1.7.1",
     "@onchain-id/solidity": "^2.2.1",
@@ -9,8 +18,11 @@
     "ethers": "^6.14.3",
     "express": "^5.1.0",
     "mongoose": "^8.14.2",
-    "mongoosh": "^0.0.7",
     "multer": "^1.4.5-lts.2",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "envalid": "^8.2.0",
+    "nodemon": "^3.1.14"
   }
 }
