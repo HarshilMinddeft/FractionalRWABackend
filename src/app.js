@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 const { connectDB } = require('./config/database');
 const RouteLoader = require('./core/RouteLoader');
 const errorHandler = require('./middleware/errorHandler');
@@ -29,7 +30,32 @@ class App {
     );
   }
 
-  // ── Step 3: Auto-load all module routes ───────────────────────────────────
+  // ── Step 3: Health check ──────────────────────────────────────────────────
+  // Registered before setupRoutes() so the 404 fallback can't swallow it, and
+  // outside src/modules/ because RouteLoader would prefix it with /api/<folder>.
+  setupHealthCheck() {
+    // mongoose.STATES maps the numeric readyState to a readable name
+    // (0 disconnected, 1 connected, 2 connecting, 3 disconnecting).
+    this.server.get('/health', (_req, res) => {
+      const state = mongoose.connection.readyState;
+      const healthy = state === 1;
+
+      // 503 on a dropped database so a load balancer stops routing here,
+      // rather than reporting 200 while every query fails.
+      res.status(healthy ? 200 : 503).json({
+        success: healthy,
+        message: healthy ? 'OK' : 'Database unavailable',
+        data: {
+          uptime: process.uptime(),
+          timestamp: new Date().toISOString(),
+          environment: env.NODE_ENV,
+          database: mongoose.STATES[state],
+        },
+      });
+    });
+  }
+
+  // ── Step 4: Auto-load all module routes ───────────────────────────────────
   async setupRoutes() {
     await RouteLoader.register(this.server);
 
@@ -46,6 +72,7 @@ class App {
   async initialize() {
     await this.connectDatabase();
     this.setupMiddleware();
+    this.setupHealthCheck();
     await this.setupRoutes();
 
     const PORT = env.PORT;

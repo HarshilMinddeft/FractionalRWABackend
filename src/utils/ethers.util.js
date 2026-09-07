@@ -1,8 +1,22 @@
 const { ethers } = require('ethers');
 const env = require('../config/env');
 
-// Singleton — instantiated once at startup, shared across the process
-const provider = new ethers.JsonRpcProvider('https://rpc.testnet.soniclabs.com');
+// Singletons — instantiated once at startup, shared across the process
+const provider = new ethers.JsonRpcProvider(env.RPC_URL);
+
 const deployer = new ethers.Wallet(env.DEPLOYER_PRIVATE_KEY, provider);
 
-module.exports = { provider, deployer };
+// Sends IdFactory.createIdentity, which is onlyOwner — this account must be
+// the IdFactory's owner. Falls back to the deployer when unset so existing
+// single-key deployments keep working unchanged.
+const idIssuer = env.ID_ISSUER_PRIVATE_KEY
+  ? new ethers.Wallet(env.ID_ISSUER_PRIVATE_KEY, provider)
+  : deployer;
+
+// Signs ERC-735 claims. Must hold a purpose-3 (CLAIM) key on the ClaimIssuer;
+// otherwise every claim it signs fails ClaimIssuer.isClaimValid.
+const claimSigner = env.CLAIM_SIGNER_PRIVATE_KEY
+  ? new ethers.Wallet(env.CLAIM_SIGNER_PRIVATE_KEY, provider)
+  : deployer;
+
+module.exports = { provider, deployer, idIssuer, claimSigner };

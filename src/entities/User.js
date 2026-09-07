@@ -12,6 +12,13 @@ const userSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
+    // The user's OnchainID IdentityProxy, created via IdFactory once KYC is
+    // approved. Absent until the Blockpass webhook completes.
+    identityAddress: {
+      type: String,
+      lowercase: true,
+      default: null,
+    },
     kycActive: {
       type: Boolean,
       default: true,

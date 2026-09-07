@@ -16,8 +16,11 @@ async function uploadFileToIPFS(filePath, originalName) {
 
   const data = new FormData();
   data.append('file', fs.createReadStream(filePath));
-  data.append('pinataOptions', '{"cidVersion": 0}');
-  data.append('pinataMetadata', `{"name": "${originalName}"}`);
+  data.append('pinataOptions', JSON.stringify({ cidVersion: 0 }));
+  // Built with JSON.stringify, not interpolation — originalName comes straight
+  // from the client, and a quote or backslash in it would otherwise produce
+  // malformed JSON that Pinata rejects with a 400.
+  data.append('pinataMetadata', JSON.stringify({ name: originalName }));
 
   const response = await axios.post(
     'https://api.pinata.cloud/pinning/pinFileToIPFS',
