@@ -14,8 +14,10 @@ const env = cleanEnv(process.env, {
   }),
   PORT: port({ default: 3001 }),
 
-  // Frontend origin allowed via CORS in production.
-  CLIENT_URL: url({ default: 'http://localhost:3000' }),
+  // Frontend origin(s) allowed via CORS in production. Comma-separated for
+  // multiple origins (e.g. local dev against a deployed backend, plus the
+  // real production frontend) — split into a list at use, in app.js.
+  CLIENT_URL: str({ default: 'http://localhost:3000' }),
 
   // MongoDB
   MONGO_URI: str(),

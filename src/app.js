@@ -20,9 +20,28 @@ class App {
   setupMiddleware() {
     this.server.use(express.json());
     this.server.use(express.urlencoded({ extended: true }));
+
+    // CLIENT_URL may list several allowed origins (comma-separated) — e.g.
+    // local dev against this deployed backend, plus the real production
+    // frontend — since the `cors` package only accepts a single string, a
+    // function, or a RegExp/array, not a delimited string directly.
+    const allowedOrigins = env.CLIENT_URL.split(',').map((origin) => origin.trim());
+
     this.server.use(
       cors({
-        origin: env.NODE_ENV === 'production' ? env.CLIENT_URL : '*',
+        origin:
+          env.NODE_ENV === 'production'
+            ? (origin, callback) => {
+                // No Origin header (curl, server-to-server, health checks) —
+                // let it through; the browser same-origin policy is what CORS
+                // exists to satisfy, and there's no browser here to protect.
+                if (!origin || allowedOrigins.includes(origin)) {
+                  callback(null, true);
+                } else {
+                  callback(new Error(`Origin ${origin} is not allowed by CORS`));
+                }
+              }
+            : '*',
         methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
         allowedHeaders: ['Content-Type', 'Authorization'],
         credentials: true,
