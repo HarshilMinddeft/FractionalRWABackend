@@ -38,7 +38,14 @@ class App {
                 if (!origin || allowedOrigins.includes(origin)) {
                   callback(null, true);
                 } else {
-                  callback(new Error(`Origin ${origin} is not allowed by CORS`));
+                  // Reject by withholding the CORS headers, not by erroring:
+                  // passing an Error here propagates to the error handler and
+                  // turns every unknown-origin request into a 500 with no CORS
+                  // headers, which the browser then reports as a CORS failure —
+                  // hiding the real cause. false lets the response proceed
+                  // normally and the browser blocks it, as CORS intends.
+                  console.warn(`[CORS] Blocked origin: ${origin}`);
+                  callback(null, false);
                 }
               }
             : '*',
