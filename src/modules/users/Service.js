@@ -114,15 +114,30 @@ class Service {
 
   /**
    * Returns the user's identity address, creating it through IdFactory if it
-   * doesn't exist yet. `createIdentity` is onlyOwner, so this is sent by the
-   * ID_ISSUER key, which must own the IdFactory.
+   * doesn't exist yet. `createIdentityWithManagementKeys` is onlyOwner, so
+   * this is sent by the ID_ISSUER key, which must own the IdFactory.
+   *
+   * Created with claimSigner as the identity's ONLY management key — the
+   * user's wallet gets none. This is deliberately custodial: plain
+   * `createIdentity` gives the user's wallet the sole key, but this webhook
+   * runs server-side with no user present to sign, so claimSigner needs a key
+   * on the identity to call `addClaim` itself. IdFactory has no function that
+   * grants a wallet AND an extra key together —
+   * createIdentityWithManagementKeys's deploy path never gives `_wallet` a
+   * key at all (see IdFactory.sol: it deploys with the factory itself as the
+   * initial key, adds each entry in `_managementKeys`, then removes the
+   * factory's key — `_wallet` is never in that list, and passing its hash
+   * explicitly reverts with "wallet is also listed in management keys").
+   * Giving the user a key as well requires a second, user-signed transaction
+   * (identity.addKey from their own wallet) — out of scope for this
+   * server-only flow.
    */
   async #ensureIdentity(userWallet) {
     const idFactory = new ethers.Contract(env.ID_FACTORY_ADDRESS, idFactoryAbi, idIssuer);
 
     // IdFactory keeps its own wallet -> identity mapping, so this doubles as
-    // the idempotency guard: createIdentity reverts with "wallet already
-    // linked to an identity" on a repeat call.
+    // the idempotency guard: createIdentityWithManagementKeys reverts with
+    // "wallet already linked to an identity" on a repeat call.
     const existing = await idFactory.getIdentity(userWallet);
     if (existing !== ethers.ZeroAddress) {
       console.info(`[Blockpass] Reusing existing identity ${existing} for ${userWallet}`);
@@ -141,8 +156,16 @@ class Service {
       );
     }
 
+    // claimSigner is the sole management key — see the class doc above for
+    // why the user's wallet isn't included. Encoded as
+    // keccak256(abi.encode(address)) per ERC-734, same as the purpose checks
+    // in #ensureKycClaim.
+    const managementKeys = [claimSigner.address].map((addr) =>
+      ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(['address'], [addr])),
+    );
+
     console.info(`[Blockpass] Creating identity via IdFactory for wallet: ${userWallet}`);
-    const tx = await idFactory.createIdentity(userWallet, salt);
+    const tx = await idFactory.createIdentityWithManagementKeys(userWallet, salt, managementKeys);
     const receipt = await tx.wait();
 
     // The identity is deployed BY the factory, so receipt.contractAddress is
@@ -168,11 +191,11 @@ class Service {
       if (parsed?.name === 'WalletLinked') return parsed.args.identity;
     }
     throw new AppError(
-      `IdFactory.createIdentity succeeded (tx ${receipt.hash}) but emitted no WalletLinked event.`,
+      `IdFactory.createIdentityWithManagementKeys succeeded (tx ${receipt.hash}) but emitted no WalletLinked event.`,
       502,
     );
   }
-
+  
   /**
    * Adds the KYC claim to the identity, unless an equivalent claim from the
    * same issuer is already present.
@@ -193,7 +216,7 @@ class Service {
       console.info(`[Blockpass] KYC claim already present on ${identityAddress} — skipping.`);
       return;
     }
-
+  
     const data = ethers.toUtf8Bytes('KYC-verified');
     const uri = `Kyc-BlockPass-${refId}`;
 
