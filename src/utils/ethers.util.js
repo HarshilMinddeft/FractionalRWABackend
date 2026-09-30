@@ -19,4 +19,11 @@ const claimSigner = env.CLAIM_SIGNER_PRIVATE_KEY
   ? new ethers.Wallet(env.CLAIM_SIGNER_PRIVATE_KEY, provider)
   : deployer;
 
-module.exports = { provider, deployer, idIssuer, claimSigner };
+// Read-only provider for the rent module. No batching (one request per call)
+// and a fixed network, so it never spends a request re-detecting the chain.
+const readProvider = new ethers.JsonRpcProvider(env.CHAIN_READ_RPC_URL, env.CHAIN_ID, {
+  staticNetwork: true,
+  batchMaxCount: 1,
+});
+
+module.exports = { provider, readProvider, deployer, idIssuer, claimSigner };
