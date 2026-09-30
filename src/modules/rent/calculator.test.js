@@ -50,6 +50,10 @@ test('mid-month launch: holders are paid only for days after launch (Sep, 3,000 
   assert.equal(rows[ALICE].grossAmount, usd(300));
   assert.equal(rows[ALICE].daysHeld, '5.00');
   assert.equal(rows[ISSUER].daysHeld, '10.00');
+  // Averaged over the 30-day period vs. only over the days actually held.
+  assert.equal(rows[ALICE].averageBalance, '10.0000');
+  assert.equal(rows[ALICE].averageHeldBalance, '60.0000');
+  assert.equal(rows[ISSUER].averageHeldBalance, '70.0000'); // 100 × 5 + 40 × 5 over 10 days
   assert.equal(result.totals.grossPaid, usd(1000));
   assert.equal(result.totals.unallocated, usd(2000)); // the 20 pre-launch days
 });

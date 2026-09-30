@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
  *   tokenSeconds  Σ balance × seconds held in the period — the rent weight:
  *                 grossAmount = rent × tokenSeconds / (totalShares × monthSeconds)
  *   heldSeconds   seconds the balance was above zero; shown as daysHeld
+ *   averageBalance      tokenSeconds / period seconds (whole period)
+ *   averageHeldBalance  tokenSeconds / heldSeconds (only while holding)
  *   sharePercent  tokenSeconds as a % of the whole month's token-seconds
  */
 const rentAllocationSchema = new mongoose.Schema(
@@ -22,6 +24,9 @@ const rentAllocationSchema = new mongoose.Schema(
     heldSeconds: { type: Number, required: true },
     daysHeld: { type: String, required: true },
     averageBalance: { type: String, required: true },
+    // Absent on drafts created before this field existed; derive it as
+    // tokenSeconds / heldSeconds.
+    averageHeldBalance: { type: String, default: null },
     sharePercent: { type: String, required: true },
 
     grossAmount: { type: String, required: true },

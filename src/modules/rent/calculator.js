@@ -178,7 +178,12 @@ function computeRentAllocation(p) {
       tokenSeconds: h.tokenSeconds,
       heldSeconds: h.heldSeconds,
       daysHeld: (h.heldSeconds / SECONDS_PER_DAY).toFixed(2),
+      // Over the whole period, including time before the holder bought (or
+      // before the property existed) — so it reads low for a mid-month buyer.
       averageBalance: ratio(h.tokenSeconds, periodSeconds, 4),
+      // Over only the time the holder had a non-zero balance — what "how many
+      // shares did they hold" usually means.
+      averageHeldBalance: ratio(h.tokenSeconds, BigInt(h.heldSeconds), 4),
       sharePercent: ratio(h.tokenSeconds * 100n, denominator, 6),
       grossAmount: gross,
       feeAmount: 0n,
